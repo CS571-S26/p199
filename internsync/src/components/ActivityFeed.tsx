@@ -21,7 +21,7 @@ export function ActivityFeed({ items }: { items: ActivityItem[] }) {
       </ul>
       {items.length === 0 ? (
         <p className="mt-4 text-sm text-slate-600">
-          No activity yet. Add an application to get started.
+          No recent activity yet. Add or update an application to see activity here.
         </p>
       ) : null}
     </div>

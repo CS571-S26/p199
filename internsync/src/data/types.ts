@@ -43,6 +43,7 @@ export type ActivityItem = {
   title: string
   detail: string
   date: string
+  timestamp?: string
 }
 
 export type DeadlineItem = {
@@ -50,5 +51,27 @@ export type DeadlineItem = {
   company: string
   role: string
   dueDate: string
+}
+
+export type Friend = {
+  id: string
+  name: string
+}
+
+export type FriendApplication = {
+  friendId: string
+  company: string
+  companyId?: string
+  role: string
+  stage: ApplicationStage
+}
+
+export type SharedJob = {
+  id: string
+  company: string
+  companyId?: string
+  fromFriendId: string
+  note: string
+  timestamp: string
 }
 

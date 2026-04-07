@@ -1,12 +1,41 @@
+import { useMemo, useState } from "react"
 import { Layout } from "@/components/Layout"
 import { Button } from "@/components/Button"
 import { StatCard } from "@/components/StatCard"
 import { ActivityFeed } from "@/components/ActivityFeed"
-import { activityFeed, upcomingDeadlines, stages } from "@/data/mockData"
+import { AddApplicationModal } from "@/components/AddApplicationModal"
+import { stages } from "@/data/mockData"
 import { useAppData } from "@/data/useAppData"
 
+function formatDate(dateStr: string): string {
+  const parts = dateStr.split("-").map(Number)
+  if (parts.length !== 3 || parts.some(isNaN)) return dateStr
+  return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
+function formatTimestamp(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
 export function DashboardPage() {
-  const { applications } = useAppData()
+  const { applications, addApplication, activityFeed, friendApplications, friends, sharedJobs } =
+    useAppData()
+
+  const [open, setOpen] = useState(false)
+  const [prefillCompany, setPrefillCompany] = useState<string | undefined>()
+
+  function openAddModal(company?: string) {
+    setPrefillCompany(company)
+    setOpen(true)
+  }
 
   const stageCounts = stages.map((s) => ({
     stage: s,
@@ -15,8 +44,7 @@ export function DashboardPage() {
 
   const total = applications.length
   const interviews =
-    applications.filter((a) => a.stage === "Interview" || a.stage === "Final Round")
-      .length
+    applications.filter((a) => a.stage === "Interview" || a.stage === "Final Round").length
   const offers = applications.filter((a) => a.stage === "Offer").length
 
   const topCompanies = Object.entries(
@@ -28,24 +56,86 @@ export function DashboardPage() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
 
+  const upcomingDeadlines = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return applications
+      .filter((a) => {
+        if (!a.deadline || a.deadline === "—") return false
+        const parts = a.deadline.split("-").map(Number)
+        if (parts.length !== 3 || parts.some(isNaN)) return false
+        const d = new Date(parts[0], parts[1] - 1, parts[2])
+        return d >= today
+      })
+      .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
+      .slice(0, 5)
+  }, [applications])
+
+  const friendOpportunities = useMemo(() => {
+    const userCompanies = new Set(applications.map((a) => a.company.toLowerCase()))
+    const map = new Map<string, { company: string; friendIds: Set<string> }>()
+    for (const fa of friendApplications) {
+      const key = fa.company.toLowerCase()
+      if (userCompanies.has(key)) continue
+      if (!map.has(key)) map.set(key, { company: fa.company, friendIds: new Set() })
+      map.get(key)!.friendIds.add(fa.friendId)
+    }
+    return Array.from(map.values())
+      .sort((a, b) => b.friendIds.size - a.friendIds.size)
+      .slice(0, 5)
+      .map((entry) => ({
+        company: entry.company,
+        friendCount: entry.friendIds.size,
+        friendNames: Array.from(entry.friendIds)
+          .map((fid) => friends.find((f) => f.id === fid)?.name ?? "")
+          .filter(Boolean),
+      }))
+  }, [applications, friendApplications, friends])
+
+  const sharedWithYou = useMemo(
+    () =>
+      sharedJobs.slice(0, 5).map((job) => ({
+        ...job,
+        friendName: friends.find((f) => f.id === job.fromFriendId)?.name ?? "Friend",
+      })),
+    [sharedJobs, friends]
+  )
+
   return (
     <Layout
       title="Dashboard"
       subtitle="A quick overview of your internship recruiting progress."
-      actions={
-        <Button
-          onClick={() => {
-            window.alert("Add applications from the Applications page in Phase 1.5.")
-          }}
-        >
-          Add Application
-        </Button>
-      }
+      actions={<Button onClick={() => openAddModal()}>Add Application</Button>}
     >
+      <AddApplicationModal
+        open={open}
+        onClose={() => setOpen(false)}
+        initialValues={prefillCompany ? { company: prefillCompany } : undefined}
+        onSave={(input) => {
+          addApplication({
+            id: "",
+            company: input.company,
+            role: input.role,
+            location: input.location,
+            stage: input.stage,
+            appliedDate: input.appliedDate,
+            deadline: input.deadline || undefined,
+            sponsorship: "unknown",
+            notes: "",
+            history: [
+              {
+                id: "created",
+                date: input.appliedDate,
+                label: "Applied",
+              },
+            ],
+          })
+        }}
+      />
+
+      {/* Stats */}
       <section aria-labelledby="stats">
-        <h2 id="stats" className="sr-only">
-          Summary stats
-        </h2>
+        <h2 id="stats" className="sr-only">Summary stats</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard label="Total applications" value={total} helper="This cycle" />
           <StatCard label="Interviews" value={interviews} helper="Including final rounds" />
@@ -53,6 +143,7 @@ export function DashboardPage() {
         </div>
       </section>
 
+      {/* Snapshot + Deadlines/Activity */}
       <section className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)] lg:col-span-2">
           <div className="flex items-start justify-between gap-4">
@@ -85,9 +176,7 @@ export function DashboardPage() {
               </div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="text-xs font-medium text-slate-500">
-                Rejected/Withdrawn
-              </div>
+              <div className="text-xs font-medium text-slate-500">Rejected/Withdrawn</div>
               <div className="mt-1 text-2xl font-semibold text-slate-900">
                 {
                   applications.filter(
@@ -100,18 +189,13 @@ export function DashboardPage() {
 
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <h3 className="text-sm font-semibold text-slate-900">
-                Stage breakdown
-              </h3>
+              <h3 className="text-sm font-semibold text-slate-900">Stage breakdown</h3>
               <div className="mt-3 space-y-2">
                 {stageCounts
                   .filter((s) => s.count > 0)
                   .slice(0, 6)
                   .map((s) => (
-                    <div
-                      key={s.stage}
-                      className="flex items-center justify-between gap-3"
-                    >
+                    <div key={s.stage} className="flex items-center justify-between gap-3">
                       <div className="text-sm text-slate-700">{s.stage}</div>
                       <div className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-800">
                         {s.count}
@@ -127,15 +211,10 @@ export function DashboardPage() {
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <h3 className="text-sm font-semibold text-slate-900">
-                Top companies
-              </h3>
+              <h3 className="text-sm font-semibold text-slate-900">Top companies</h3>
               <div className="mt-3 space-y-2">
                 {topCompanies.map(([name, count]) => (
-                  <div
-                    key={name}
-                    className="flex items-center justify-between gap-3"
-                  >
+                  <div key={name} className="flex items-center justify-between gap-3">
                     <div className="truncate text-sm text-slate-700">{name}</div>
                     <div className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-800">
                       {count}
@@ -154,38 +233,124 @@ export function DashboardPage() {
 
         <div className="space-y-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
-            <h2 className="text-sm font-semibold text-slate-900">
-              Upcoming deadlines
-            </h2>
+            <h2 className="text-sm font-semibold text-slate-900">Upcoming deadlines</h2>
             <p className="mt-1 text-sm text-slate-600">
-              A few items to keep on your radar.
+              Applications with approaching deadlines.
             </p>
-            <ul className="mt-4 space-y-3">
-              {upcomingDeadlines.slice(0, 5).map((d) => (
-                <li
-                  key={d.id}
-                  className="rounded-xl border border-slate-200 bg-white p-4"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-medium text-slate-900">
-                        {d.company}
+            {upcomingDeadlines.length === 0 ? (
+              <p className="mt-4 text-sm text-slate-600">
+                No upcoming deadlines. Add a deadline when creating an application.
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {upcomingDeadlines.map((a) => (
+                  <li
+                    key={a.id}
+                    className="rounded-xl border border-slate-200 bg-white p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium text-slate-900">
+                          {a.company}
+                        </div>
+                        <div className="truncate text-sm text-slate-600">{a.role}</div>
                       </div>
-                      <div className="truncate text-sm text-slate-600">{d.role}</div>
+                      <div className="shrink-0 text-xs font-medium text-slate-700">
+                        {formatDate(a.deadline!)}
+                      </div>
                     </div>
-                    <div className="shrink-0 text-xs font-medium text-slate-700">
-                      {d.dueDate}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <ActivityFeed items={activityFeed} />
         </div>
       </section>
+
+      {/* Opportunities from Friends + Shared with You */}
+      <section className="mt-6 grid gap-6 lg:grid-cols-2">
+        {/* Opportunities from Friends */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">Opportunities from friends</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Companies your friends applied to that you haven't yet.
+            </p>
+          </div>
+          {friendOpportunities.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-600">
+              You've already applied everywhere your friends have. Nice work!
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {friendOpportunities.map((opp) => (
+                <li
+                  key={opp.company}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-slate-900">
+                      {opp.company}
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-500">
+                      {opp.friendNames.join(", ")} applied
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    className="h-8 shrink-0 px-3 py-1 text-xs"
+                    onClick={() => openAddModal(opp.company)}
+                  >
+                    Add
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Shared with You */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">Shared with you</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Tips your friends saved about companies.
+            </p>
+          </div>
+          {sharedWithYou.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-600">
+              No tips yet. Save a friend's tip from the Companies page.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {sharedWithYou.map((job) => (
+                <li
+                  key={job.id}
+                  className="rounded-xl border border-violet-100 bg-violet-50 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-slate-900">
+                        <span className="text-violet-700">{job.friendName}</span>
+                        {" shared "}
+                        <span>{job.company}</span>
+                      </div>
+                      {job.note ? (
+                        <p className="mt-1 text-xs leading-5 text-slate-600">"{job.note}"</p>
+                      ) : null}
+                    </div>
+                    <div className="shrink-0 text-xs text-slate-400">
+                      {formatTimestamp(job.timestamp)}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
     </Layout>
   )
 }
-

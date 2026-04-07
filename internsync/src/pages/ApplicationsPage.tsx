@@ -12,7 +12,7 @@ import { AddApplicationModal } from "@/components/AddApplicationModal"
 export function ApplicationsPage() {
   const [stage, setStage] = useState<ApplicationStage | "All">("All")
   const navigate = useNavigate()
-  const { applications, addApplication } = useAppData()
+  const { applications, addApplication, friendApplications } = useAppData()
   const [open, setOpen] = useState(false)
 
   const filtered = useMemo(() => {
@@ -41,6 +41,7 @@ export function ApplicationsPage() {
             location: input.location,
             stage: input.stage,
             appliedDate: input.appliedDate,
+            deadline: input.deadline || undefined,
             sponsorship: "unknown",
             notes: "",
             history: [
@@ -48,7 +49,6 @@ export function ApplicationsPage() {
                 id: "created",
                 date: input.appliedDate,
                 label: "Applied",
-                detail: "Added in Phase 1.5 (local only).",
               },
             ],
           })
@@ -77,13 +77,19 @@ export function ApplicationsPage() {
           </div>
         ) : (
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {filtered.map((a) => (
-              <ApplicationCard
-                key={a.id}
-                application={a}
-                onClick={(id) => navigate(`/applications/${id}`)}
-              />
-            ))}
+            {filtered.map((a) => {
+              const friendCount = friendApplications.filter(
+                (fa) => fa.company.toLowerCase() === a.company.toLowerCase()
+              ).length
+              return (
+                <ApplicationCard
+                  key={a.id}
+                  application={a}
+                  onClick={(id) => navigate(`/applications/${id}`)}
+                  friendCount={friendCount}
+                />
+              )
+            })}
           </div>
         )}
       </section>

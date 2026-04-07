@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Modal } from "@/components/Modal"
 import { Button } from "@/components/Button"
 import { stages } from "@/data/mockData"
@@ -10,22 +10,33 @@ type FormState = {
   location: string
   stage: ApplicationStage
   appliedDate: string
+  deadline: string
 }
 
 type Props = {
   open: boolean
   onClose: () => void
   onSave: (input: FormState) => void
+  initialValues?: { company?: string; role?: string }
 }
 
-export function AddApplicationModal({ open, onClose, onSave }: Props) {
-  const [form, setForm] = useState<FormState>({
-    company: "",
-    role: "",
-    location: "",
-    stage: "Applied",
-    appliedDate: "",
-  })
+const defaultForm: FormState = {
+  company: "",
+  role: "",
+  location: "",
+  stage: "Applied",
+  appliedDate: "",
+  deadline: "",
+}
+
+export function AddApplicationModal({ open, onClose, onSave, initialValues }: Props) {
+  const [form, setForm] = useState<FormState>({ ...defaultForm, ...initialValues })
+
+  // Reset form (with any pre-fills) whenever the modal opens
+  useEffect(() => {
+    if (open) setForm({ ...defaultForm, ...initialValues })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   const errors = useMemo(() => {
     const e: Partial<Record<keyof FormState, string>> = {}
@@ -47,13 +58,6 @@ export function AddApplicationModal({ open, onClose, onSave }: Props) {
           if (!canSubmit) return
           onSave(form)
           onClose()
-          setForm({
-            company: "",
-            role: "",
-            location: "",
-            stage: "Applied",
-            appliedDate: "",
-          })
         }}
       >
         <div className="grid gap-4 sm:grid-cols-2">
@@ -125,7 +129,7 @@ export function AddApplicationModal({ open, onClose, onSave }: Props) {
             </select>
           </div>
 
-          <div className="sm:col-span-2">
+          <div>
             <label
               htmlFor="appliedDate"
               className="text-sm font-medium text-slate-700"
@@ -142,6 +146,19 @@ export function AddApplicationModal({ open, onClose, onSave }: Props) {
             {errors.appliedDate ? (
               <div className="mt-1 text-xs text-rose-600">{errors.appliedDate}</div>
             ) : null}
+          </div>
+
+          <div>
+            <label htmlFor="deadline" className="text-sm font-medium text-slate-700">
+              Deadline <span className="font-normal text-slate-400">(optional)</span>
+            </label>
+            <input
+              id="deadline"
+              type="date"
+              value={form.deadline}
+              onChange={(e) => setForm((p) => ({ ...p, deadline: e.target.value }))}
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            />
           </div>
         </div>
 

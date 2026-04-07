@@ -1,13 +1,19 @@
 import { useMemo, useState } from "react"
 import { Layout } from "@/components/Layout"
 import { CompanyCard } from "@/components/CompanyCard"
+import { ShareJobModal } from "@/components/ShareJobModal"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
 import { useAppData } from "@/data/useAppData"
 
 export function CompaniesPage() {
   const [query, setQuery] = useState("")
   const debounced = useDebouncedValue(query, 150)
-  const { companies, favoriteCompanyIds, toggleFavoriteCompany } = useAppData()
+  const { companies, favoriteCompanyIds, toggleFavoriteCompany, sharedJobs, friends, shareJob } =
+    useAppData()
+
+  const [shareTarget, setShareTarget] = useState<{ company: string; companyId: string } | null>(
+    null
+  )
 
   const filtered = useMemo(() => {
     const q = debounced.trim().toLowerCase()
@@ -15,11 +21,40 @@ export function CompaniesPage() {
     return companies.filter((c) => c.name.toLowerCase().includes(q))
   }, [companies, debounced])
 
+  const sharedNotesByCompany = useMemo(() => {
+    const map: Record<string, { friendName: string; note: string; timestamp: string }[]> = {}
+    for (const job of sharedJobs) {
+      if (!job.companyId) continue
+      const friendName = friends.find((f) => f.id === job.fromFriendId)?.name ?? "Friend"
+      if (!map[job.companyId]) map[job.companyId] = []
+      map[job.companyId].push({ friendName, note: job.note, timestamp: job.timestamp })
+    }
+    return map
+  }, [sharedJobs, friends])
+
   return (
     <Layout
       title="Companies"
-      subtitle="Explore companies with sponsorship signals (mock data)."
+      subtitle="Explore companies with sponsorship signals."
     >
+      {shareTarget ? (
+        <ShareJobModal
+          open
+          onClose={() => setShareTarget(null)}
+          company={shareTarget.company}
+          friends={friends}
+          onSave={(friendId, note) => {
+            shareJob({
+              company: shareTarget.company,
+              companyId: shareTarget.companyId,
+              fromFriendId: friendId,
+              note,
+            })
+            setShareTarget(null)
+          }}
+        />
+      ) : null}
+
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -75,6 +110,8 @@ export function CompaniesPage() {
                 company={c}
                 favorite={favoriteCompanyIds.has(c.id)}
                 onToggleFavorite={() => toggleFavoriteCompany(c.id)}
+                onShare={() => setShareTarget({ company: c.name, companyId: c.id })}
+                sharedNotes={sharedNotesByCompany[c.id] ?? []}
               />
             ))}
           </div>
@@ -83,4 +120,3 @@ export function CompaniesPage() {
     </Layout>
   )
 }
-

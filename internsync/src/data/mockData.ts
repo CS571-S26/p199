@@ -4,6 +4,9 @@ import type {
   ApplicationStage,
   Company,
   DeadlineItem,
+  Friend,
+  FriendApplication,
+  SharedJob,
 } from "@/data/types"
 
 export const companies: Company[] = [
@@ -267,6 +270,43 @@ export const activityFeed: ActivityItem[] = [
     title: "OA scheduled",
     detail: "Microsoft PM Intern OA completed",
     date: "Feb 21",
+  },
+]
+
+export const friends: Friend[] = [
+  { id: "f1", name: "Aisha" },
+  { id: "f2", name: "Rahul" },
+  { id: "f3", name: "Priya" },
+]
+
+export const friendApplications: FriendApplication[] = [
+  { friendId: "f1", company: "Google", companyId: "c_google", role: "SWE Intern", stage: "Final Round" },
+  { friendId: "f2", company: "Google", companyId: "c_google", role: "STEP Intern", stage: "OA" },
+  { friendId: "f3", company: "Amazon", companyId: "c_amazon", role: "SDE Intern", stage: "Applied" },
+  { friendId: "f1", company: "Nvidia", companyId: "c_nvidia", role: "Software Intern (ML)", stage: "Interview" },
+  { friendId: "f2", company: "Stripe", role: "SWE Intern", stage: "Interview" },
+  { friendId: "f3", company: "Stripe", role: "Backend Intern", stage: "Applied" },
+  { friendId: "f1", company: "Airbnb", role: "SWE Intern", stage: "Applied" },
+  { friendId: "f3", company: "Airbnb", role: "SWE Intern", stage: "OA" },
+  { friendId: "f2", company: "Databricks", companyId: "c_databricks", role: "Data Engineering Intern", stage: "Applied" },
+]
+
+export const seedSharedJobs: SharedJob[] = [
+  {
+    id: "sj1",
+    company: "Nvidia",
+    companyId: "c_nvidia",
+    fromFriendId: "f1",
+    note: "Great ML exposure — you'd be a perfect fit for their infra team.",
+    timestamp: "2026-03-10T14:00:00.000Z",
+  },
+  {
+    id: "sj2",
+    company: "Jane Street",
+    companyId: "c_janestreet",
+    fromFriendId: "f2",
+    note: "The interview process is rigorous but totally worth it. Prep OCaml basics.",
+    timestamp: "2026-03-12T09:30:00.000Z",
   },
 ]
 
