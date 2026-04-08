@@ -13,9 +13,7 @@ export function Navbar() {
           </div>
           <div className="hidden leading-tight sm:block">
             <div className="text-sm font-semibold text-slate-900">InternSync</div>
-            <div className="text-xs text-slate-500">
-              Phase 1 MVP (mock data)
-            </div>
+            <div className="text-xs text-slate-500">Internship tracker</div>
           </div>
         </div>
 

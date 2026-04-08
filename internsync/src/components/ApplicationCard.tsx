@@ -1,6 +1,17 @@
 import type { Application } from "@/data/types"
 import { StagePill } from "@/components/StagePill"
 
+function formatDate(dateStr: string): string {
+  if (!dateStr || dateStr === "—") return "—"
+  const parts = dateStr.split("-").map(Number)
+  if (parts.length !== 3 || parts.some(isNaN)) return dateStr
+  return new Date(parts[0], parts[1] - 1, parts[2]).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
 type Props = {
   application: Application
   onClick?: (id: string) => void
@@ -27,7 +38,7 @@ export function ApplicationCard({ application, onClick, friendCount = 0 }: Props
         <StagePill stage={application.stage} />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
-        <div className="text-xs text-slate-500">Applied: {application.appliedDate}</div>
+        <div className="text-xs text-slate-500">Applied: {formatDate(application.appliedDate)}</div>
         {friendCount > 0 ? (
           <div className="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">
             <span>👥</span>

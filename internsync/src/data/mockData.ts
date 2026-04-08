@@ -69,7 +69,7 @@ export const applications: Application[] = [
     location: "Mountain View, CA",
     stage: "Applied",
     appliedDate: "2026-01-18",
-    deadline: "2026-03-24",
+    deadline: "2026-05-02",
     sponsorship: "yes",
     notes: "Reached out to a recruiter on LinkedIn. Waiting for OA invite.",
     history: [
@@ -85,7 +85,7 @@ export const applications: Application[] = [
     location: "Redmond, WA",
     stage: "OA",
     appliedDate: "2026-01-22",
-    deadline: "2026-03-20",
+    deadline: "2026-04-28",
     sponsorship: "yes",
     notes: "OA focused on product sense + prioritization.",
     history: [
@@ -101,7 +101,7 @@ export const applications: Application[] = [
     location: "Seattle, WA",
     stage: "Interview",
     appliedDate: "2026-01-10",
-    deadline: "2026-03-18",
+    deadline: "2026-04-18",
     sponsorship: "yes",
     notes: "Prep LP stories. Expect 1–2 technical questions.",
     history: [
@@ -130,7 +130,7 @@ export const applications: Application[] = [
     location: "Santa Clara, CA",
     stage: "Applied",
     appliedDate: "2026-02-01",
-    deadline: "2026-03-28",
+    deadline: "2026-04-25",
     sponsorship: "unknown",
     notes: "Tailor resume to ML infra projects.",
     history: [{ id: "h1", date: "2026-02-01", label: "Applied" }],
@@ -159,7 +159,7 @@ export const applications: Application[] = [
     location: "New York, NY",
     stage: "OA",
     appliedDate: "2026-02-04",
-    deadline: "2026-03-19",
+    deadline: "2026-04-19",
     sponsorship: "yes",
     notes: "OA is tricky; focus on correctness and speed.",
     history: [
@@ -191,7 +191,7 @@ export const applications: Application[] = [
     location: "Sunnyvale, CA",
     stage: "Final Round",
     appliedDate: "2026-02-10",
-    deadline: "2026-03-22",
+    deadline: "2026-04-22",
     sponsorship: "yes",
     notes: "Behavioral + coding; keep answers structured.",
     history: [
@@ -208,7 +208,7 @@ export const applications: Application[] = [
     location: "Remote",
     stage: "Applied",
     appliedDate: "2026-02-12",
-    deadline: "2026-03-30",
+    deadline: "2026-05-10",
     sponsorship: "yes",
     notes: "Applied with referral.",
     history: [{ id: "h1", date: "2026-02-12", label: "Applied", detail: "Used referral link." }],
@@ -236,7 +236,7 @@ export const applications: Application[] = [
     location: "Austin, TX",
     stage: "Interview",
     appliedDate: "2026-02-20",
-    deadline: "2026-03-26",
+    deadline: "2026-04-30",
     sponsorship: "unknown",
     notes: "Review OS fundamentals; expect C/C++ questions.",
     history: [
@@ -246,30 +246,34 @@ export const applications: Application[] = [
   },
 ]
 
-export const activityFeed: ActivityItem[] = [
+export const seedActivityFeed: ActivityItem[] = [
   {
     id: "act1",
     title: "Stage updated",
-    detail: "Moved Amazon SDE Intern to Interview",
-    date: "Mar 10",
+    detail: "Amazon SDE Intern → Interview",
+    date: "Mar 10, 2026",
+    timestamp: "2026-03-10T10:00:00.000Z",
   },
   {
     id: "act2",
     title: "Application added",
-    detail: "Saved Meta SWE Intern to Wishlist",
-    date: "Mar 08",
+    detail: "Added Meta — SWE Intern",
+    date: "Mar 8, 2026",
+    timestamp: "2026-03-08T09:00:00.000Z",
   },
   {
     id: "act3",
-    title: "Offer received",
+    title: "Stage updated",
     detail: "Capital One SWE Intern → Offer",
-    date: "Feb 28",
+    date: "Feb 28, 2026",
+    timestamp: "2026-02-28T14:00:00.000Z",
   },
   {
     id: "act4",
-    title: "OA scheduled",
-    detail: "Microsoft PM Intern OA completed",
-    date: "Feb 21",
+    title: "Stage updated",
+    detail: "Microsoft PM Intern → OA",
+    date: "Feb 21, 2026",
+    timestamp: "2026-02-21T11:30:00.000Z",
   },
 ]
 

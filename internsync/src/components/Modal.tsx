@@ -50,9 +50,6 @@ export function Modal({ title, open, onClose, children }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-sm font-semibold text-slate-900">{title}</div>
-            <div className="mt-1 text-sm text-slate-600">
-              Saved locally (Phase 1.5).
-            </div>
           </div>
           <button
             type="button"

@@ -69,7 +69,7 @@ export function CompanyCard({
               aria-label="Save a friend's tip about this company"
               title="Save tip from a friend"
             >
-              + Tip
+              Friend tip
             </Button>
           ) : null}
           <Button

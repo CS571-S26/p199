@@ -5,6 +5,7 @@ import {
   friends as seedFriends,
   friendApplications as seedFriendApplications,
   seedSharedJobs,
+  seedActivityFeed,
 } from "@/data/mockData"
 import type {
   ActivityItem,
@@ -38,7 +39,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   )
   const [activityItems, setActivityItems] = useLocalStorageState<ActivityItem[]>(
     "internsync.activity",
-    []
+    seedActivityFeed
   )
   const [favoriteIds, setFavoriteIds] = useLocalStorageState<string[]>(
     "internsync.favoriteCompanies",
