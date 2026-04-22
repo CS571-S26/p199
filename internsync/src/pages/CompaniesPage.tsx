@@ -2,18 +2,26 @@ import { useMemo, useState } from "react"
 import { Layout } from "@/components/Layout"
 import { CompanyCard } from "@/components/CompanyCard"
 import { ShareJobModal } from "@/components/ShareJobModal"
+import { AddQuestionModal } from "@/components/AddQuestionModal"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue"
 import { useAppData } from "@/data/useAppData"
 
 export function CompaniesPage() {
   const [query, setQuery] = useState("")
   const debounced = useDebouncedValue(query, 150)
-  const { companies, favoriteCompanyIds, toggleFavoriteCompany, sharedJobs, friends, shareJob } =
-    useAppData()
+  const {
+    companies,
+    favoriteCompanyIds,
+    toggleFavoriteCompany,
+    sharedJobs,
+    friends,
+    shareJob,
+    companyQuestions,
+    addCompanyQuestion,
+  } = useAppData()
 
-  const [shareTarget, setShareTarget] = useState<{ company: string; companyId: string } | null>(
-    null
-  )
+  const [shareTarget, setShareTarget] = useState<{ company: string; companyId: string } | null>(null)
+  const [questionTarget, setQuestionTarget] = useState<{ company: string; companyId: string } | null>(null)
 
   const filtered = useMemo(() => {
     const q = debounced.trim().toLowerCase()
@@ -32,10 +40,25 @@ export function CompaniesPage() {
     return map
   }, [sharedJobs, friends])
 
+  const questionsByCompany = useMemo(() => {
+    const map: Record<string, typeof companyQuestions> = {}
+    for (const q of companyQuestions) {
+      const key = q.companyId ?? q.company
+      if (!map[key]) map[key] = []
+      map[key].push(q)
+    }
+    return map
+  }, [companyQuestions])
+
+  const friendNameMap = useMemo(
+    () => Object.fromEntries(friends.map((f) => [f.id, f.name])),
+    [friends]
+  )
+
   return (
     <Layout
       title="Companies"
-      subtitle="Explore companies with sponsorship signals."
+      subtitle="Explore companies with sponsorship signals and interview intel from your network."
     >
       {shareTarget ? (
         <ShareJobModal
@@ -51,6 +74,20 @@ export function CompaniesPage() {
               note,
             })
             setShareTarget(null)
+          }}
+        />
+      ) : null}
+
+      {questionTarget ? (
+        <AddQuestionModal
+          open
+          onClose={() => setQuestionTarget(null)}
+          company={questionTarget.company}
+          companyId={questionTarget.companyId}
+          friends={friends}
+          onSave={(q) => {
+            addCompanyQuestion(q)
+            setQuestionTarget(null)
           }}
         />
       ) : null}
@@ -111,7 +148,10 @@ export function CompaniesPage() {
                 favorite={favoriteCompanyIds.has(c.id)}
                 onToggleFavorite={() => toggleFavoriteCompany(c.id)}
                 onShare={() => setShareTarget({ company: c.name, companyId: c.id })}
+                onAddQuestion={() => setQuestionTarget({ company: c.name, companyId: c.id })}
                 sharedNotes={sharedNotesByCompany[c.id] ?? []}
+                questions={questionsByCompany[c.id] ?? questionsByCompany[c.name] ?? []}
+                friendNames={friendNameMap}
               />
             ))}
           </div>

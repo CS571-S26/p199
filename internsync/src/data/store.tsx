@@ -6,13 +6,19 @@ import {
   friendApplications as seedFriendApplications,
   seedSharedJobs,
   seedActivityFeed,
+  seedNetworkContacts,
+  seedCompanyQuestions,
+  seedWeeklyGoal,
 } from "@/data/mockData"
 import type {
   ActivityItem,
   Application,
   ApplicationHistoryItem,
   ApplicationStage,
+  CompanyQuestion,
+  NetworkContact,
   SharedJob,
+  WeeklyGoal,
 } from "@/data/types"
 import { useLocalStorageState } from "@/hooks/useLocalStorageState"
 import { DataContext, type DataContextValue } from "@/data/context"
@@ -49,6 +55,18 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     "internsync.sharedJobs",
     seedSharedJobs
   )
+  const [networkContactsRaw, setNetworkContactsRaw] = useLocalStorageState<NetworkContact[]>(
+    "internsync.networkContacts",
+    seedNetworkContacts
+  )
+  const [companyQuestionsRaw, setCompanyQuestionsRaw] = useLocalStorageState<CompanyQuestion[]>(
+    "internsync.companyQuestions",
+    seedCompanyQuestions
+  )
+  const [weeklyGoalRaw, setWeeklyGoalRaw] = useLocalStorageState<WeeklyGoal | null>(
+    "internsync.weeklyGoal",
+    seedWeeklyGoal
+  )
 
   const companies = useMemo(() => seedCompanies, [])
   const friends = useMemo(() => seedFriends, [])
@@ -61,6 +79,14 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const sharedJobs = useMemo(
     () => [...sharedJobsRaw].sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
     [sharedJobsRaw]
+  )
+  const networkContacts = useMemo(
+    () => [...networkContactsRaw].sort((a, b) => b.date.localeCompare(a.date)),
+    [networkContactsRaw]
+  )
+  const companyQuestions = useMemo(
+    () => [...companyQuestionsRaw].sort((a, b) => b.timestamp.localeCompare(a.timestamp)),
+    [companyQuestionsRaw]
   )
 
   function pushActivity(title: string, detail: string) {
@@ -128,9 +154,29 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         }
         setSharedJobsRaw((prev) => [job, ...prev])
       },
+      networkContacts,
+      addNetworkContact: (contact) => {
+        const nc: NetworkContact = { ...contact, id: safeId("nc") }
+        setNetworkContactsRaw((prev) => [nc, ...prev])
+        pushActivity("Contact added", `Added ${nc.name} at ${nc.company}`)
+      },
+      deleteNetworkContact: (id) => {
+        setNetworkContactsRaw((prev) => prev.filter((c) => c.id !== id))
+      },
+      companyQuestions,
+      addCompanyQuestion: (q) => {
+        const question: CompanyQuestion = {
+          ...q,
+          id: safeId("cq"),
+          timestamp: new Date().toISOString(),
+        }
+        setCompanyQuestionsRaw((prev) => [question, ...prev])
+      },
+      weeklyGoal: weeklyGoalRaw,
+      setWeeklyGoal: (goal) => setWeeklyGoalRaw(goal),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [applications, companies, favoriteCompanyIds, activityFeed, friends, friendApplications, sharedJobs]
+    [applications, companies, favoriteCompanyIds, activityFeed, friends, friendApplications, sharedJobs, networkContacts, companyQuestions, weeklyGoalRaw]
   )
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

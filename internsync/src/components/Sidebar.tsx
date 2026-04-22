@@ -52,6 +52,19 @@ export function Sidebar() {
           >
             Companies
           </NavLink>
+          <NavLink
+            to="/networking"
+            className={({ isActive }) =>
+              [
+                itemBase,
+                isActive
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-700 hover:bg-slate-100",
+              ].join(" ")
+            }
+          >
+            Networking
+          </NavLink>
         </div>
       </div>
     </aside>

@@ -66,6 +66,21 @@ export function Navbar() {
                 Companies
               </NavLink>
             </li>
+            <li>
+              <NavLink
+                to="/networking"
+                className={({ isActive }) =>
+                  [
+                    linkBase,
+                    isActive
+                      ? "bg-slate-900 text-white"
+                      : "text-slate-700 hover:bg-slate-100",
+                  ].join(" ")
+                }
+              >
+                Networking
+              </NavLink>
+            </li>
           </ul>
         </nav>
       </div>

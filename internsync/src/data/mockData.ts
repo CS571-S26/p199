@@ -3,10 +3,13 @@ import type {
   Application,
   ApplicationStage,
   Company,
+  CompanyQuestion,
   DeadlineItem,
   Friend,
   FriendApplication,
+  NetworkContact,
   SharedJob,
+  WeeklyGoal,
 } from "@/data/types"
 
 export const companies: Company[] = [
@@ -244,6 +247,30 @@ export const applications: Application[] = [
       { id: "h2", date: "2026-03-12", label: "Interview", detail: "Interview scheduled." },
     ],
   },
+  {
+    id: "a13",
+    company: "Figma",
+    role: "SWE Intern",
+    location: "San Francisco, CA",
+    stage: "Applied",
+    appliedDate: "2026-04-15",
+    deadline: "2026-05-15",
+    sponsorship: "unknown",
+    notes: "Applied via referral from Aisha.",
+    history: [{ id: "h1", date: "2026-04-15", label: "Applied", detail: "Referral link from Aisha." }],
+  },
+  {
+    id: "a14",
+    company: "Stripe",
+    role: "SWE Intern",
+    location: "San Francisco, CA",
+    stage: "Applied",
+    appliedDate: "2026-04-22",
+    deadline: "2026-05-20",
+    sponsorship: "yes",
+    notes: "Submitted today.",
+    history: [{ id: "h1", date: "2026-04-22", label: "Applied" }],
+  },
 ]
 
 export const seedActivityFeed: ActivityItem[] = [
@@ -331,5 +358,106 @@ export const upcomingDeadlines: DeadlineItem[] = [
   { id: "d3", company: "Microsoft", role: "PM Intern", dueDate: "2026-03-20" },
   { id: "d4", company: "Google", role: "STEP Intern", dueDate: "2026-03-22" },
   { id: "d5", company: "Google", role: "SWE Intern", dueDate: "2026-03-24" },
+]
+
+export const seedCompanyQuestions: CompanyQuestion[] = [
+  {
+    id: "q1",
+    company: "Google",
+    companyId: "c_google",
+    friendId: "f1",
+    category: "algorithms",
+    round: "Technical",
+    text: "Got a DP problem on interval scheduling — asked to maximize number of non-overlapping meetings.",
+    timestamp: "2026-03-15T10:00:00.000Z",
+  },
+  {
+    id: "q2",
+    company: "Google",
+    companyId: "c_google",
+    friendId: "f2",
+    category: "behavioral",
+    round: "Behavioral",
+    text: "\"Tell me about a time you had to influence without authority.\" They went deep on follow-ups.",
+    timestamp: "2026-03-20T14:00:00.000Z",
+  },
+  {
+    id: "q3",
+    company: "Amazon",
+    companyId: "c_amazon",
+    friendId: "f3",
+    category: "behavioral",
+    round: "Technical",
+    text: "Two coding questions + one LP story (Customer Obsession). Expect STAR format for everything.",
+    timestamp: "2026-03-18T09:00:00.000Z",
+  },
+  {
+    id: "q4",
+    company: "Jane Street",
+    companyId: "c_janestreet",
+    friendId: "f1",
+    category: "algorithms",
+    round: "OA",
+    text: "OA had a combinatorics puzzle and a graph BFS problem. Time pressure is real — practice speed.",
+    timestamp: "2026-02-12T11:00:00.000Z",
+  },
+  {
+    id: "q5",
+    company: "Microsoft",
+    companyId: "c_microsoft",
+    friendId: "f2",
+    category: "case",
+    round: "Phone Screen",
+    text: "PM screen: design a notification system for Teams. Focus on prioritization and trade-offs.",
+    timestamp: "2026-02-25T15:00:00.000Z",
+  },
+]
+
+export const seedNetworkContacts: NetworkContact[] = [
+  {
+    id: "nc1",
+    company: "Google",
+    companyId: "c_google",
+    name: "Sarah Chen",
+    title: "University Recruiter",
+    type: "recruiter",
+    date: "2026-01-15",
+    notes: "Met at campus info session. Very responsive on LinkedIn.",
+    outcome: "referred",
+    linkedIn: "linkedin.com/in/sarahchen",
+  },
+  {
+    id: "nc2",
+    company: "Stripe",
+    name: "Marcus Liu",
+    title: "Senior SWE",
+    type: "coffee_chat",
+    date: "2026-02-10",
+    notes: "30-min Zoom call. Gave great insight on Stripe's infra team culture.",
+    outcome: "intro_scheduled",
+  },
+  {
+    id: "nc3",
+    company: "Amazon",
+    companyId: "c_amazon",
+    name: "Priya Nair",
+    title: "SDE II",
+    type: "referral",
+    date: "2026-01-08",
+    notes: "College connection. Submitted a referral for SDE intern role.",
+    outcome: "ongoing",
+    linkedIn: "linkedin.com/in/priyanair",
+  },
+]
+
+export const seedWeeklyGoal: WeeklyGoal = {
+  target: 5,
+  weekStart: "2026-04-20",
+}
+
+export const friendStreaks: { friendId: string; streak: number }[] = [
+  { friendId: "f1", streak: 6 },
+  { friendId: "f2", streak: 3 },
+  { friendId: "f3", streak: 1 },
 ]
 

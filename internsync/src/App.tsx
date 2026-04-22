@@ -4,6 +4,7 @@ import { ApplicationsPage } from "@/pages/ApplicationsPage"
 import { CompaniesPage } from "@/pages/CompaniesPage"
 import { NotFoundPage } from "@/pages/NotFoundPage"
 import { ApplicationDetailsPage } from "@/pages/ApplicationDetailsPage"
+import { NetworkingPage } from "@/pages/NetworkingPage"
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route path="/applications" element={<ApplicationsPage />} />
       <Route path="/applications/:id" element={<ApplicationDetailsPage />} />
       <Route path="/companies" element={<CompaniesPage />} />
+      <Route path="/networking" element={<NetworkingPage />} />
       <Route path="/home" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

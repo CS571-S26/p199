@@ -4,7 +4,7 @@ import { Button } from "@/components/Button"
 import { StatCard } from "@/components/StatCard"
 import { ActivityFeed } from "@/components/ActivityFeed"
 import { AddApplicationModal } from "@/components/AddApplicationModal"
-import { stages } from "@/data/mockData"
+import { stages, friendStreaks } from "@/data/mockData"
 import { useAppData } from "@/data/useAppData"
 
 function formatDate(dateStr: string): string {
@@ -25,8 +25,38 @@ function formatTimestamp(iso: string): string {
   })
 }
 
+function getWeekStart(date: Date): string {
+  const d = new Date(date)
+  const day = d.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  d.setDate(d.getDate() + diff)
+  return d.toISOString().split("T")[0]
+}
+
+function getCurrentStreak(applications: { stage: string; appliedDate: string }[]): number {
+  const appliedDates = new Set(
+    applications
+      .filter((a) => a.stage !== "Wishlist" && a.appliedDate && a.appliedDate !== "—")
+      .map((a) => a.appliedDate)
+  )
+  let streak = 0
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const current = new Date(today)
+  while (true) {
+    const dateStr = current.toISOString().split("T")[0]
+    if (appliedDates.has(dateStr)) {
+      streak++
+      current.setDate(current.getDate() - 1)
+    } else {
+      break
+    }
+  }
+  return streak
+}
+
 export function DashboardPage() {
-  const { applications, addApplication, activityFeed, friendApplications, friends, sharedJobs } =
+  const { applications, addApplication, activityFeed, friendApplications, friends, sharedJobs, weeklyGoal, setWeeklyGoal } =
     useAppData()
 
   const [open, setOpen] = useState(false)
@@ -101,6 +131,31 @@ export function DashboardPage() {
     [sharedJobs, friends]
   )
 
+  const currentStreak = useMemo(() => getCurrentStreak(applications), [applications])
+
+  const weekStart = getWeekStart(new Date())
+  const appsThisWeek = useMemo(() => {
+    return applications.filter((a) => {
+      if (!a.appliedDate || a.appliedDate === "—" || a.stage === "Wishlist") return false
+      return a.appliedDate >= weekStart
+    }).length
+  }, [applications, weekStart])
+
+  const goalTarget = weeklyGoal?.target ?? 0
+  const goalProgress = goalTarget > 0 ? Math.min(appsThisWeek / goalTarget, 1) : 0
+
+  const [editingGoal, setEditingGoal] = useState(false)
+  const [goalInput, setGoalInput] = useState("")
+
+  const friendStreakList = useMemo(
+    () =>
+      friendStreaks.map((fs) => ({
+        ...fs,
+        name: friends.find((f) => f.id === fs.friendId)?.name ?? "Friend",
+      })),
+    [friends]
+  )
+
   return (
     <Layout
       title="Dashboard"
@@ -140,6 +195,125 @@ export function DashboardPage() {
           <StatCard label="Total applications" value={total} helper="This cycle" />
           <StatCard label="Interviews" value={interviews} helper="Including final rounds" />
           <StatCard label="Offers" value={offers} helper="Congratulations" />
+        </div>
+      </section>
+
+      {/* Streaks + Weekly Goal */}
+      <section className="mt-6 grid gap-6 lg:grid-cols-2">
+        {/* Weekly goal */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-900">Weekly goal</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                {goalTarget > 0
+                  ? `${appsThisWeek} of ${goalTarget} applications this week`
+                  : "Set a target for this week."}
+              </p>
+            </div>
+            <button
+              onClick={() => { setGoalInput(goalTarget > 0 ? String(goalTarget) : ""); setEditingGoal(true) }}
+              className="text-xs font-medium text-slate-500 hover:text-slate-800"
+            >
+              {goalTarget > 0 ? "Edit" : "Set goal"}
+            </button>
+          </div>
+          {editingGoal ? (
+            <div className="mt-4 flex items-center gap-2">
+              <input
+                autoFocus
+                type="number"
+                min={1}
+                max={50}
+                value={goalInput}
+                onChange={(e) => setGoalInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const n = parseInt(goalInput)
+                    if (n > 0) setWeeklyGoal({ target: n, weekStart })
+                    setEditingGoal(false)
+                  }
+                  if (e.key === "Escape") setEditingGoal(false)
+                }}
+                className="w-24 rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-slate-900"
+                placeholder="5"
+              />
+              <button
+                onClick={() => {
+                  const n = parseInt(goalInput)
+                  if (n > 0) setWeeklyGoal({ target: n, weekStart })
+                  setEditingGoal(false)
+                }}
+                className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => setEditingGoal(false)}
+                className="text-xs font-medium text-slate-500 hover:text-slate-800"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : goalTarget > 0 ? (
+            <div className="mt-4">
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className={[
+                    "h-full rounded-full transition-all",
+                    goalProgress >= 1 ? "bg-emerald-500" : "bg-slate-900",
+                  ].join(" ")}
+                  style={{ width: `${goalProgress * 100}%` }}
+                />
+              </div>
+              {goalProgress >= 1 && (
+                <p className="mt-2 text-xs font-medium text-emerald-600">Goal reached this week!</p>
+              )}
+            </div>
+          ) : null}
+        </div>
+
+        {/* Streaks */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
+          <h2 className="text-sm font-semibold text-slate-900">Application streaks</h2>
+          <p className="mt-1 text-sm text-slate-600">Days in a row applying — keep the momentum.</p>
+          <div className="mt-4 space-y-2">
+            {/* Your streak */}
+            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-slate-900">You</span>
+                {currentStreak >= 3 && (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                    on fire
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xl font-bold text-slate-900">{currentStreak}</span>
+                <span className="text-xs text-slate-500">day{currentStreak !== 1 ? "s" : ""}</span>
+              </div>
+            </div>
+            {/* Friends' streaks */}
+            {friendStreakList.map((fs) => (
+              <div
+                key={fs.friendId}
+                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-700">{fs.name}</span>
+                  {fs.streak >= 5 && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      on fire
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-xl font-bold text-slate-600">{fs.streak}</span>
+                  <span className="text-xs text-slate-500">day{fs.streak !== 1 ? "s" : ""}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

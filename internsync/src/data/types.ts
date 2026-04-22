@@ -75,3 +75,38 @@ export type SharedJob = {
   timestamp: string
 }
 
+export type ContactType = "recruiter" | "engineer" | "referral" | "coffee_chat" | "other"
+export type ContactOutcome = "referred" | "intro_scheduled" | "no_response" | "ongoing" | "closed"
+
+export type NetworkContact = {
+  id: string
+  company: string
+  companyId?: string
+  name: string
+  title: string
+  type: ContactType
+  date: string
+  notes?: string
+  outcome?: ContactOutcome
+  linkedIn?: string
+}
+
+export type QuestionCategory = "algorithms" | "behavioral" | "system_design" | "case" | "other"
+export type QuestionRound = "OA" | "Phone Screen" | "Technical" | "Final Round" | "Behavioral"
+
+export type CompanyQuestion = {
+  id: string
+  company: string
+  companyId?: string
+  friendId: string
+  category: QuestionCategory
+  round: QuestionRound
+  text: string
+  timestamp: string
+}
+
+export type WeeklyGoal = {
+  target: number
+  weekStart: string
+}
+

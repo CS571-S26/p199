@@ -4,9 +4,12 @@ import type {
   Application,
   ApplicationStage,
   Company,
+  CompanyQuestion,
   Friend,
   FriendApplication,
+  NetworkContact,
   SharedJob,
+  WeeklyGoal,
 } from "@/data/types"
 
 export type DataContextValue = {
@@ -22,6 +25,16 @@ export type DataContextValue = {
   friendApplications: FriendApplication[]
   sharedJobs: SharedJob[]
   shareJob: (data: Omit<SharedJob, "id" | "timestamp">) => void
+  // Networking
+  networkContacts: NetworkContact[]
+  addNetworkContact: (contact: Omit<NetworkContact, "id">) => void
+  deleteNetworkContact: (id: string) => void
+  // Company questions
+  companyQuestions: CompanyQuestion[]
+  addCompanyQuestion: (q: Omit<CompanyQuestion, "id" | "timestamp">) => void
+  // Weekly goal
+  weeklyGoal: WeeklyGoal | null
+  setWeeklyGoal: (goal: WeeklyGoal) => void
 }
 
 export const DataContext = createContext<DataContextValue | null>(null)
