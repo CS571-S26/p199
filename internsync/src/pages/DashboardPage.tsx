@@ -7,6 +7,42 @@ import { AddApplicationModal } from "@/components/AddApplicationModal"
 import { stages, friendStreaks } from "@/data/mockData"
 import { useAppData } from "@/data/useAppData"
 
+const QUOTES = [
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "Every rejection is a redirect to something better.", author: "Unknown" },
+  { text: "Your network is your net worth.", author: "Porter Gale" },
+  { text: "Opportunities don't happen. You create them.", author: "Chris Grosser" },
+  { text: "Don't wait for the perfect moment. Take the moment and make it perfect.", author: "Unknown" },
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "Apply to more than you think you need. Odds are a numbers game.", author: "Unknown" },
+  { text: "Rejection is not failure. Failure is giving up.", author: "Jenette Goldstein" },
+  { text: "The people who are crazy enough to think they can change the world are the ones who do.", author: "Steve Jobs" },
+  { text: "Success is the sum of small efforts repeated day in and day out.", author: "Robert Collier" },
+  { text: "A warm referral is worth 10 cold applications.", author: "Unknown" },
+  { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+  { text: "Interview prep today, offer letter tomorrow.", author: "Unknown" },
+  { text: "Don't be afraid to ask. The worst they can say is no.", author: "Unknown" },
+  { text: "Your first job doesn't define your career. Getting in the door does.", author: "Unknown" },
+  { text: "Every expert was once a beginner. Every pro was once an amateur.", author: "Robin Sharma" },
+  { text: "Small steps every day compound into giant leaps.", author: "Unknown" },
+  { text: "Coffee chats open more doors than cold applications.", author: "Unknown" },
+  { text: "The grind you put in now is the foundation you stand on later.", author: "Unknown" },
+  { text: "An internship is a long interview. Show up like it matters.", author: "Unknown" },
+  { text: "Comparison is the thief of joy. Run your own race.", author: "Theodore Roosevelt" },
+  { text: "Luck is what happens when preparation meets opportunity.", author: "Seneca" },
+  { text: "Apply early, follow up often, never stop learning.", author: "Unknown" },
+  { text: "Your GPA gets you the interview. Your curiosity gets you the offer.", author: "Unknown" },
+  { text: "Stay patient. Stay consistent. The right opportunity will come.", author: "Unknown" },
+]
+
+function getDailyQuote() {
+  const now = new Date()
+  const dayOfYear = Math.floor(
+    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
+  )
+  return QUOTES[dayOfYear % QUOTES.length]
+}
+
 function formatDate(dateStr: string): string {
   const parts = dateStr.split("-").map(Number)
   if (parts.length !== 3 || parts.some(isNaN)) return dateStr
@@ -197,6 +233,20 @@ export function DashboardPage() {
           <StatCard label="Offers" value={offers} helper="Congratulations" />
         </div>
       </section>
+
+      {/* Daily quote */}
+      {(() => {
+        const q = getDailyQuote()
+        return (
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-900 to-slate-700 px-6 py-4 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
+            <div className="text-xs font-medium uppercase tracking-widest text-slate-400">Daily motivation</div>
+            <blockquote className="mt-2 text-base font-medium leading-7 text-white">
+              "{q.text}"
+            </blockquote>
+            <div className="mt-1.5 text-sm text-slate-400">— {q.author}</div>
+          </div>
+        )
+      })()}
 
       {/* Streaks + Weekly Goal */}
       <section className="mt-6 grid gap-6 lg:grid-cols-2">
