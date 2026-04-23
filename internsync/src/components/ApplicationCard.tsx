@@ -18,6 +18,7 @@ type Props = {
 }
 
 export function ApplicationCard({ application, onClick }: Props) {
+  const friendCount = application.friendIds?.length ?? 0
   return (
     <button
       type="button"
@@ -36,8 +37,14 @@ export function ApplicationCard({ application, onClick }: Props) {
         </div>
         <StagePill stage={application.stage} />
       </div>
-      <div className="mt-3">
+      <div className="mt-3 flex items-center justify-between gap-3">
         <div className="text-xs text-slate-500">Applied: {formatDate(application.appliedDate)}</div>
+        {friendCount > 0 ? (
+          <div className="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">
+            <span>👥</span>
+            <span>{friendCount} friend{friendCount === 1 ? "" : "s"} applied</span>
+          </div>
+        ) : null}
       </div>
     </button>
   )

@@ -41,14 +41,23 @@ export function ApplicationDetailsPage() {
     ? companies.find((c) => c.id === app.companyId)
     : companies.find((c) => c.name === app?.company)
 
-  const friendsAtCompany = app
-    ? friendApplications
-        .filter((fa) => fa.company.toLowerCase() === app.company.toLowerCase())
-        .map((fa) => ({
-          ...fa,
-          friendName: friends.find((f) => f.id === fa.friendId)?.name ?? fa.friendId,
-        }))
-    : []
+  const linkedFriendIds = new Set(app?.friendIds ?? [])
+
+  const linkedFriends = friends.filter((f) => linkedFriendIds.has(f.id)).map((f) => {
+    const fa = friendApplications.find(
+      (fa) => fa.friendId === f.id && fa.company.toLowerCase() === app?.company.toLowerCase()
+    )
+    return { ...f, stage: fa?.stage }
+  })
+
+  const unlinkableFriends = friends.filter((f) => !linkedFriendIds.has(f.id))
+
+  function toggleFriend(friendId: string) {
+    const current = new Set(app?.friendIds ?? [])
+    if (current.has(friendId)) current.delete(friendId)
+    else current.add(friendId)
+    updateApplication(app!.id, { friendIds: Array.from(current) })
+  }
 
   // Edit state — initialised lazily when app loads
   const [editingNotes, setEditingNotes] = useState(false)
@@ -299,38 +308,60 @@ export function ApplicationDetailsPage() {
             </section>
           ) : null}
 
-          {friendsAtCompany.length > 0 ? (
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Friends at {app.company}
-              </h2>
-              <p className="mt-1 text-sm text-slate-600">See where your network stands.</p>
-              <ul className="mt-4 space-y-2">
-                {friendsAtCompany.map((fa, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2"
-                  >
-                    <span className="text-sm font-medium text-slate-800">{fa.friendName}</span>
-                    <span
-                      className={[
-                        "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
-                        fa.stage === "Offer"
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : fa.stage === "Final Round" || fa.stage === "Interview"
-                            ? "border-amber-200 bg-amber-50 text-amber-800"
-                            : fa.stage === "Rejected"
-                              ? "border-rose-200 bg-rose-50 text-rose-700"
-                              : "border-slate-200 bg-slate-50 text-slate-700",
-                      ].join(" ")}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
+            <h2 className="text-sm font-semibold text-slate-900">Friends also applied</h2>
+            <p className="mt-1 text-sm text-slate-600">Track which friends applied to this role.</p>
+            <ul className="mt-4 space-y-2">
+              {linkedFriends.map((f) => (
+                <li
+                  key={f.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2"
+                >
+                  <span className="text-sm font-medium text-slate-800">{f.name}</span>
+                  <div className="flex items-center gap-2">
+                    {f.stage ? (
+                      <span
+                        className={[
+                          "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+                          f.stage === "Offer"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            : f.stage === "Final Round" || f.stage === "Interview"
+                              ? "border-amber-200 bg-amber-50 text-amber-800"
+                              : f.stage === "Rejected"
+                                ? "border-rose-200 bg-rose-50 text-rose-700"
+                                : "border-slate-200 bg-slate-50 text-slate-700",
+                        ].join(" ")}
+                      >
+                        {f.stage}
+                      </span>
+                    ) : null}
+                    <button
+                      onClick={() => toggleFriend(f.id)}
+                      className="text-xs text-slate-400 hover:text-rose-500"
                     >
-                      {fa.stage}
-                    </span>
-                  </li>
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {unlinkableFriends.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {unlinkableFriends.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => toggleFriend(f.id)}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700"
+                  >
+                    + {f.name}
+                  </button>
                 ))}
-              </ul>
-            </section>
-          ) : null}
+              </div>
+            )}
+            {linkedFriends.length === 0 && unlinkableFriends.length === 0 && (
+              <p className="mt-2 text-sm text-slate-500">No friends to add.</p>
+            )}
+          </section>
         </aside>
       </div>
     </Layout>

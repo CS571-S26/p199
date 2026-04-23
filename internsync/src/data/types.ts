@@ -36,6 +36,7 @@ export type Application = {
   notes?: string
   sponsorship?: SponsorshipStatus
   history?: ApplicationHistoryItem[]
+  friendIds?: string[]
 }
 
 export type ActivityItem = {

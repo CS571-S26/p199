@@ -75,6 +75,7 @@ export const applications: Application[] = [
     deadline: "2026-05-02",
     sponsorship: "yes",
     notes: "Reached out to a recruiter on LinkedIn. Waiting for OA invite.",
+    friendIds: ["f1", "f2"],
     history: [
       { id: "h1", date: "2026-01-18", label: "Applied", detail: "Submitted via careers portal." },
       { id: "h2", date: "2026-01-20", label: "Follow-up", detail: "Messaged recruiter with resume." },
@@ -107,6 +108,7 @@ export const applications: Application[] = [
     deadline: "2026-04-18",
     sponsorship: "yes",
     notes: "Prep LP stories. Expect 1–2 technical questions.",
+    friendIds: ["f3"],
     history: [
       { id: "h1", date: "2026-01-10", label: "Applied" },
       { id: "h2", date: "2026-02-02", label: "OA", detail: "OA completed; passed." },
@@ -136,6 +138,7 @@ export const applications: Application[] = [
     deadline: "2026-04-25",
     sponsorship: "unknown",
     notes: "Tailor resume to ML infra projects.",
+    friendIds: ["f1"],
     history: [{ id: "h1", date: "2026-02-01", label: "Applied" }],
   },
   {
