@@ -40,9 +40,10 @@ function formatDate(dateStr: string): string {
 }
 
 export function NetworkingPage() {
-  const { networkContacts, addNetworkContact, deleteNetworkContact } = useAppData()
+  const { networkContacts, addNetworkContact, deleteNetworkContact, friends, addFriend, deleteFriend } = useAppData()
   const [open, setOpen] = useState(false)
   const [filterCompany, setFilterCompany] = useState("")
+  const [newFriendName, setNewFriendName] = useState("")
 
   const companies = useMemo(
     () => Array.from(new Set(networkContacts.map((c) => c.company))).sort(),
@@ -81,8 +82,52 @@ export function NetworkingPage() {
         onSave={(contact) => addNetworkContact(contact)}
       />
 
+      {/* Friends */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
+        <h2 className="text-sm font-semibold text-slate-900">Your friends</h2>
+        <p className="mt-1 text-sm text-slate-600">Add friends to track alongside your applications.</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {friends.map((f) => (
+            <div
+              key={f.id}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5"
+            >
+              <span className="text-sm font-medium text-slate-800">{f.name}</span>
+              <button
+                onClick={() => {
+                  if (!window.confirm(`Remove ${f.name} from your friends?`)) return
+                  deleteFriend(f.id)
+                }}
+                className="text-slate-400 hover:text-rose-500"
+                title="Remove friend"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+        <form
+          className="mt-4 flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!newFriendName.trim()) return
+            addFriend(newFriendName)
+            setNewFriendName("")
+          }}
+        >
+          <input
+            value={newFriendName}
+            onChange={(e) => setNewFriendName(e.target.value)}
+            placeholder="Friend's name"
+            className="w-48 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+          />
+          <Button type="submit" disabled={!newFriendName.trim()}>Add friend</Button>
+        </form>
+      </div>
+
       {/* Stats row */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_25px_-15px_rgba(0,0,0,0.35)]">
           <div className="text-xs font-medium text-slate-500">Total contacts</div>
           <div className="mt-1 text-2xl font-semibold text-slate-900">{networkContacts.length}</div>

@@ -22,6 +22,8 @@ export type DataContextValue = {
   toggleFavoriteCompany: (companyId: string) => void
   activityFeed: ActivityItem[]
   friends: Friend[]
+  addFriend: (name: string) => void
+  deleteFriend: (id: string) => void
   friendApplications: FriendApplication[]
   sharedJobs: SharedJob[]
   shareJob: (data: Omit<SharedJob, "id" | "timestamp">) => void

@@ -68,8 +68,13 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     seedWeeklyGoal
   )
 
+  const [friendsRaw, setFriendsRaw] = useLocalStorageState<typeof seedFriends>(
+    "internsync.friends",
+    seedFriends
+  )
+
   const companies = useMemo(() => seedCompanies, [])
-  const friends = useMemo(() => seedFriends, [])
+  const friends = useMemo(() => friendsRaw, [friendsRaw])
   const friendApplications = useMemo(() => seedFriendApplications, [])
   const favoriteCompanyIds = useMemo(() => new Set(favoriteIds), [favoriteIds])
   const activityFeed = useMemo(
@@ -144,6 +149,13 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       },
       activityFeed,
       friends,
+      addFriend: (name) => {
+        const f = { id: safeId("f"), name: name.trim() }
+        setFriendsRaw((prev) => [...prev, f])
+      },
+      deleteFriend: (id) => {
+        setFriendsRaw((prev) => prev.filter((f) => f.id !== id))
+      },
       friendApplications,
       sharedJobs,
       shareJob: (data) => {
@@ -176,7 +188,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       setWeeklyGoal: (goal) => setWeeklyGoalRaw(goal),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [applications, companies, favoriteCompanyIds, activityFeed, friends, friendApplications, sharedJobs, networkContacts, companyQuestions, weeklyGoalRaw]
+    [applications, companies, favoriteCompanyIds, activityFeed, friends, friendApplications, sharedJobs, networkContacts, companyQuestions, weeklyGoalRaw, friendsRaw]
   )
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
